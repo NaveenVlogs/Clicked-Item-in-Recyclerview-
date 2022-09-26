@@ -1,0 +1,163 @@
+(Item click recyclerview item nd pass data next screen)
+// MyAdapter classs
+
+
+public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
+
+   ArrayList<ModelClass>dataholder;
+   Context context; //->create Context here and Constructor
+
+    public MyAdapter(ArrayList<ModelClass> dataholder, Context context) {
+        this.dataholder = dataholder;
+        this.context = context;
+    }
+
+1) MyAdapter  inOnbind viewholder class 
+
+  @Override
+    public void onBindViewHolder(@NonNull  MyAdapter.ViewHolder holder, int position) {
+            final ModelClass temp = dataholder.get(position);
+        holder.text1.setText(dataholder.get(position).getUserId());
+       holder.textid.setText(dataholder.get(position).getId());
+        holder.texttittle.setText(dataholder.get(position).getTitle());
+        holder.textbody.setText(dataholder.get(position).getBody());
+
+        holder.texttittle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(context,ClickActivity.class);
+                intent.putExtra("title",temp.getTitle());
+                intent.putExtra("body",temp.getBody());
+                intent.putExtra("userId",temp.getUserId());
+                intent.putExtra("id",temp.getId());
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent);
+
+            }
+        });
+
+2) Main Activity code java code
+
+
+public class MainActivity extends AppCompatActivity {
+
+    RecyclerView recyclerview;
+    MyAdapter adapter;
+//    Button btnsubmid;
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        recyclerview = findViewById(R.id.recyclerview);
+//        recyclerview.setLayoutManager(new LinearLayoutManager(this));
+//        btnsubmid = findViewById(R.id.btnsubmid);
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(this,2);
+        recyclerview.setLayoutManager(gridLayoutManager);
+
+processdata();
+
+    }
+
+    private void processdata()
+    {
+        Call<ArrayList<ModelClass>>call = Controler.getInstance()
+                .api2().listmode();
+
+        call.enqueue(new Callback<ArrayList<ModelClass>>() {
+            @Override
+            public void onResponse(Call<ArrayList<ModelClass>> call, Response<ArrayList<ModelClass>> response) {
+                ArrayList<ModelClass> data =response.body();
+                adapter = new MyAdapter(data,getApplicationContext()); //-> change here getapplicationContext
+                recyclerview.setAdapter(adapter);
+            }
+
+            @Override
+            public void onFailure(Call<ArrayList<ModelClass>> call, Throwable t) {
+                Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    }
+
+3) create a new Activity here which i get data by clicked previous class item
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="300dp"
+    android:background="#D6DBF8"
+    tools:context=".ClickActivity">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="demo5"
+        android:textStyle="bold"
+        android:textSize="30sp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="10dp"
+        android:id="@+id/text5"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="demo6"
+        android:textStyle="bold"
+        android:textSize="30sp"
+        android:layout_below="@+id/text5"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="10dp"
+        android:id="@+id/text6"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="demo7"
+        android:textStyle="bold"
+        android:textSize="30sp"
+        android:layout_below="@+id/text6"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="10dp"
+        android:id="@+id/text7"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="demo8"
+        android:textStyle="bold"
+        android:textSize="30sp"
+        android:layout_below="@+id/text7"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="10dp"
+        android:id="@+id/text8"/>
+
+</RelativeLayout>
+
+4)java code here 
+
+public class ClickActivity extends AppCompatActivity {
+TextView text5,text6,text7,text8;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_click);
+        text5 = findViewById(R.id.text5);
+        text6 = findViewById(R.id.text6);
+        text7 = findViewById(R.id.text7);
+        text8 = findViewById(R.id.text8);
+
+        text5.setText(getIntent().getStringExtra("title"));
+        text6.setText(getIntent().getStringExtra("id"));
+        text7.setText(getIntent().getStringExtra("userId"));
+        text8.setText(getIntent().getStringExtra("body"));
+
+
+
+    }
+}
+
+
+
+
